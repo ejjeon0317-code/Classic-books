@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>고전을 전자책으로</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f8f6; color: #1a1a1a; }
+.app { max-width: 480px; margin: 0 auto; background: #fff; min-height: 100vh; }
+.header { padding: 1.5rem 1rem 1rem; border-bottom: 0.5px solid #e0e0e0; }
+.header h1 { font-size: 18px; font-weight: 500; }
+.header p { font-size: 13px; color: #888; margin-top: 4px; }
+.filter-row { display: flex; gap: 8px; padding: 12px 1rem; overflow-x: auto; border-bottom: 0.5px solid #e0e0e0; }
+.filter-btn { font-size: 12px; padding: 5px 12px; border-radius: 20px; border: 0.5px solid #ccc; background: none; cursor: pointer; color: #666; white-space: nowrap; }
+.filter-btn.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+.book-list { padding: 1rem; display: flex; flex-direction: column; gap: 10px; }
+.book-card { background: #fff; border: 0.5px solid #e0e0e0; border-radius: 12px; padding: 1rem 1.25rem; cursor: pointer; }
+.book-card:hover { border-color: #bbb; }
+.book-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.book-title { font-size: 15px; font-weight: 500; line-height: 1.4; }
+.book-title-ko { font-size: 13px; color: #888; margin-top: 2px; }
+.stars { font-size: 12px; color: #c9a227; white-space: nowrap; }
+.book-meta { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.badge { font-size: 11px; padding: 3px 8px; border-radius: 20px; background: #f4f4f4; color: #666; border: 0.5px solid #e0e0e0; }
+.book-blurb { font-size: 13px; color: #666; margin-top: 8px; line-height: 1.6; }
+.detail-view { padding: 0 1rem; display: none; }
+.back-btn { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #888; background: none; border: none; cursor: pointer; padding: 1rem 0; }
+.detail-title { font-size: 20px; font-weight: 500; line-height: 1.4; }
+.detail-ko { font-size: 15px; color: #888; margin-top: 4px; }
+.detail-stars { font-size: 16px; color: #c9a227; margin-top: 8px; }
+.detail-blurb { font-size: 15px; color: #555; margin-top: 16px; line-height: 1.7; border-left: 2px solid #e0e0e0; padding-left: 12px; }
+.section-label { font-size: 12px; font-weight: 500; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; margin: 16px 0 8px; }
+.media-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.media-badge { font-size: 12px; padding: 6px 10px; border-radius: 8px; text-align: center; }
+.media-on { background: #f4f4f4; color: #1a1a1a; border: 0.5px solid #ccc; font-weight: 500; }
+.media-off { color: #ccc; border: 0.5px solid #eee; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div id="list-view">
+    <div class="header">
+      <h1>고전을 전자책으로</h1>
+      <p>BBC · TIME · Guardian · Le Monde 선정</p>
+    </div>
+    <div class="filter-row">
+      <button class="filter-btn active" onclick="filterBooks('all',this)">전체</button>
+      <button class="filter-btn" onclick="filterBooks('4',this)">★★★★</button>
+      <button class="filter-btn" onclick="filterBooks('3',this)">★★★</button>
+      <button class="filter-btn" onclick="filterBooks('2',this)">★★</button>
+    </div>
+    <div class="book-list" id="book-list"></div>
+  </div>
+  <div id="detail-view" class="detail-view"></div>
+</div>
+<script>
+const books = [
+  { en:"The Big Sleep", ko:"빅 슬립", author:"Raymond Chandler", year:1939, stars:4, bbc:true, time:true, guardian:true, lemonde:true, blurb:"도시의 뒷골목, 권력의 부패, 도덕적 회색지대 — 4개 매체 모두가 선택한 이 목록의 유일한 ★★★★." },
+  { en:"Brave New World", ko:"멋진 신세계", author:"Aldous Huxley", year:1932, stars:3, bbc:true, time:false, guardian:true, lemonde:true, blurb:"억압이 아닌 쾌락으로 통제되는 사회. 오웰이 두려움을 경고했다면, 헉슬리는 편안함을 경고했다." },
+  { en:"Nineteen Eighty-Four", ko:"1984", author:"George Orwell", year:1949, stars:3, bbc:true, time:false, guardian:true, lemonde:true, blurb:"빅브라더를 두려워하던 시대가 있었다. 지금 우리는 스스로 빅브라더가 되어가고 있지는 않은가." },
+  { en:"The Great Gatsby", ko:"위대한 개츠비", author:"F. Scott Fitzgerald", year:1925, stars:3, bbc:false, time:true, guardian:true, lemonde:true, blurb:"꿈을 향해 평생 달려가다 결국 혼자 남은 사람. 아메리칸 드림의 가장 아름다운 부고." },
+  { en:"The Grapes of Wrath", ko:"분노의 포도", author:"John Steinbeck", year:1939, stars:3, bbc:false, time:true, guardian:true, lemonde:true, blurb:"집을 잃고 길 위에 선 사람들. 1930년대 미국의 이야기인가, 지금 어딘가의 이야기인가." },
+  { en:"The Catcher in the Rye", ko:"호밀밭의 파수꾼", author:"J. D. Salinger", year:1951, stars:3, bbc:false, time:true, guardian:true, lemonde:true, blurb:"가짜인 척하는 세상에서 진짜이고 싶었던 사람." },
+  { en:"Lolita", ko:"롤리타", author:"Vladimir Nabokov", year:1955, stars:3, bbc:false, time:true, guardian:true, lemonde:true, blurb:"역사상 가장 아름다운 문장으로 쓰인 가장 불편한 이야기." },
+  { en:"Lord of the Flies", ko:"파리대왕", author:"William Golding", year:1954, stars:3, bbc:true, time:true, guardian:true, lemonde:false, blurb:"문명은 생각보다 훨씬 얇은 껍데기다." },
+  { en:"To Kill a Mockingbird", ko:"앵무새 죽이기", author:"Harper Lee", year:1960, stars:3, bbc:true, time:true, guardian:true, lemonde:false, blurb:"옳은 일을 하는 것이 왜 이렇게 외로운가." },
+  { en:"On the Road", ko:"길 위에서", author:"Jack Kerouac", year:1957, stars:3, bbc:false, time:true, guardian:true, lemonde:true, blurb:"자유는 목적지가 아니라 이동 그 자체에 있다." },
+  { en:"Gone with the Wind", ko:"바람과 함께 사라지다", author:"Margaret Mitchell", year:1936, stars:2, bbc:false, time:false, guardian:true, lemonde:true, blurb:"전쟁이 모든 것을 앗아간 뒤에도, 내일은 내일의 태양이 뜬다." },
+  { en:"Catch-22", ko:"캐치-22", author:"Joseph Heller", year:1961, stars:2, bbc:true, time:true, guardian:false, lemonde:false, blurb:"전쟁의 부조리를 웃음으로 해부한, 가장 진지한 코미디." },
+  { en:"Ulysses", ko:"율리시스", author:"James Joyce", year:1922, stars:2, bbc:true, time:false, guardian:true, lemonde:false, blurb:"읽기 가장 어렵다고 알려진 소설. 그러나 한 줄 한 줄이 살아있다." }
+];
+
+let currentFilter = 'all';
+
+function starsStr(n) { return '★'.repeat(n) + '☆'.repeat(4-n); }
+
+function renderList() {
+  const list = document.getElementById('book-list');
+  const filtered = currentFilter==='all' ? books : books.filter(b=>b.stars===parseInt(currentFilter));
+  list.innerHTML = filtered.map((b)=>`
+    <div class="book-card" onclick="showDetail(${books.indexOf(b)})">
+      <div class="book-header">
+        <div><div class="book-title">${b.en}</div><div class="book-title-ko">${b.ko}</div></div>
+        <div class="stars">${starsStr(b.stars)}</div>
+      </div>
+      <div class="book-meta"><span class="badge">${b.author}</span><span class="badge">${b.year}</span></div>
+      <div class="book-blurb">${b.blurb}</div>
+    </div>`).join('');
+}
+
+function filterBooks(val,btn) {
+  currentFilter=val;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderList();
+}
+
+function showDetail(idx) {
+  const b=books[idx];
+  document.getElementById('list-view').style.display='none';
+  const dv=document.getElementById('detail-view');
+  dv.style.display='block';
+  const media=['BBC','TIME','Guardian','Le Monde'];
+  const keys=['bbc','time','guardian','lemonde'];
+  dv.innerHTML=`
+    <button class="back-btn" onclick="showList()">← 목록으로</button>
+    <div class="detail-title">${b.en}</div>
+    <div class="detail-ko">${b.ko} · ${b.author} · ${b.year}</div>
+    <div class="detail-stars">${starsStr(b.stars)}</div>
+    <div class="detail-blurb">${b.blurb}</div>
+    <div class="section-label">매체 선정 현황</div>
+    <div class="media-grid">${media.map((m,i)=>`<div class="media-badge ${b[keys[i]]?'media-on':'media-off'}">${b[keys[i]]?'✓ ':''}${m}</div>`).join('')}</div>`;
+}
+
+function showList() {
+  document.getElementById('detail-view').style.display='none';
+  document.getElementById('list-view').style.display='block';
+}
+
+renderList();
+</script>
+</body>
+</html>
