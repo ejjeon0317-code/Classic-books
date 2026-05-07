@@ -24,6 +24,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .book-meta { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
 .badge { font-size: 11px; padding: 3px 8px; border-radius: 20px; background: #f4f4f4; color: #666; border: 0.5px solid #e0e0e0; }
 .book-blurb { font-size: 13px; color: #666; margin-top: 8px; line-height: 1.6; }
+.read-btn { display: inline-block; margin-top: 10px; font-size: 12px; padding: 6px 14px; border-radius: 20px; background: #1a1a1a; color: #fff; text-decoration: none; }
+.read-btn:hover { background: #333; }
 .detail-view { padding: 0 1rem; display: none; }
 .back-btn { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #888; background: none; border: none; cursor: pointer; padding: 1rem 0; }
 .detail-title { font-size: 20px; font-weight: 500; line-height: 1.4; }
@@ -31,10 +33,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .detail-stars { font-size: 16px; color: #c9a227; margin-top: 8px; }
 .detail-blurb { font-size: 15px; color: #555; margin-top: 16px; line-height: 1.7; border-left: 2px solid #e0e0e0; padding-left: 12px; }
 .section-label { font-size: 12px; font-weight: 500; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; margin: 16px 0 8px; }
-.media-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.media-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
 .media-badge { font-size: 12px; padding: 6px 10px; border-radius: 8px; text-align: center; }
 .media-on { background: #f4f4f4; color: #1a1a1a; border: 0.5px solid #ccc; font-weight: 500; }
 .media-off { color: #ccc; border: 0.5px solid #eee; }
+.ebook-btn { display: block; text-align: center; padding: 12px; border-radius: 10px; background: #1a1a1a; color: #fff; text-decoration: none; font-size: 14px; margin-top: 8px; }
+.ebook-btn:hover { background: #333; }
 </style>
 </head>
 <body>
@@ -55,6 +59,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   <div id="detail-view" class="detail-view"></div>
 </div>
 <script>
+const BASE = "https://si.dkyobobook.co.kr/content/contentView.ink?schDvsn=000&schClst=all&cttsDvsnCode=001&schTxt=";
 const books = [
   { en:"The Big Sleep", ko:"빅 슬립", author:"Raymond Chandler", year:1939, stars:4, bbc:true, time:true, guardian:true, lemonde:true, blurb:"도시의 뒷골목, 권력의 부패, 도덕적 회색지대 — 4개 매체 모두가 선택한 이 목록의 유일한 ★★★★." },
   { en:"Brave New World", ko:"멋진 신세계", author:"Aldous Huxley", year:1932, stars:3, bbc:true, time:false, guardian:true, lemonde:true, blurb:"억압이 아닌 쾌락으로 통제되는 사회. 오웰이 두려움을 경고했다면, 헉슬리는 편안함을 경고했다." },
@@ -62,18 +67,18 @@ const books = [
   { en:"The Great Gatsby", ko:"위대한 개츠비", author:"F. Scott Fitzgerald", year:1925, stars:3, bbc:false, time:true, guardian:true, lemonde:true, blurb:"꿈을 향해 평생 달려가다 결국 혼자 남은 사람. 아메리칸 드림의 가장 아름다운 부고." },
   { en:"The Grapes of Wrath", ko:"분노의 포도", author:"John Steinbeck", year:1939, stars:3, bbc:false, time:true, guardian:true, lemonde:true, blurb:"집을 잃고 길 위에 선 사람들. 1930년대 미국의 이야기인가, 지금 어딘가의 이야기인가." },
   { en:"The Catcher in the Rye", ko:"호밀밭의 파수꾼", author:"J. D. Salinger", year:1951, stars:3, bbc:false, time:true, guardian:true, lemonde:true, blurb:"가짜인 척하는 세상에서 진짜이고 싶었던 사람." },
-  { en:"Lolita", ko:"롤리타", author:"Vladimir Nabokov", year:1955, stars:3, bbc:false, time:true, guardian:true, lemonde:true, blurb:"역사상 가장 아름다운 문장으로 쓰인 가장 불편한 이야기." },
-  { en:"Lord of the Flies", ko:"파리대왕", author:"William Golding", year:1954, stars:3, bbc:true, time:true, guardian:true, lemonde:false, blurb:"문명은 생각보다 훨씬 얇은 껍데기다." },
-  { en:"To Kill a Mockingbird", ko:"앵무새 죽이기", author:"Harper Lee", year:1960, stars:3, bbc:true, time:true, guardian:true, lemonde:false, blurb:"옳은 일을 하는 것이 왜 이렇게 외로운가." },
-  { en:"On the Road", ko:"길 위에서", author:"Jack Kerouac", year:1957, stars:3, bbc:false, time:true, guardian:true, lemonde:true, blurb:"자유는 목적지가 아니라 이동 그 자체에 있다." },
+  { en:"For Whom the Bell Tolls", ko:"누구를 위하여 종은 울리나", author:"Ernest Hemingway", year:1940, stars:2, bbc:false, time:false, guardian:true, lemonde:true, blurb:"전쟁 한가운데서 사랑을 선택한 사람. 헤밍웨이가 가장 직접적으로 삶과 죽음을 쓴 소설." },
+  { en:"Middlemarch", ko:"미들마치", author:"George Eliot", year:1871, stars:2, bbc:true, time:false, guardian:true, lemonde:false, blurb:"이상과 현실 사이에서 살아가는 사람들. 영어로 쓰인 가장 위대한 소설 중 하나." },
+  { en:"Frankenstein", ko:"프랑켄슈타인", author:"Mary Shelley", year:1818, stars:2, bbc:true, time:false, guardian:true, lemonde:false, blurb:"창조자의 욕망과 피조물의 비극. AI 시대에 다시 읽어야 할 200년 전 경고." },
+  { en:"The Hound of the Baskervilles", ko:"바스커빌 가의 개", author:"Arthur Conan Doyle", year:1902, stars:2, bbc:true, time:false, guardian:true, lemonde:false, blurb:"셜록 홈즈 시리즈의 정점. 추리소설이 하나의 장르가 된 순간." },
   { en:"Gone with the Wind", ko:"바람과 함께 사라지다", author:"Margaret Mitchell", year:1936, stars:2, bbc:false, time:false, guardian:true, lemonde:true, blurb:"전쟁이 모든 것을 앗아간 뒤에도, 내일은 내일의 태양이 뜬다." },
-  { en:"Catch-22", ko:"캐치-22", author:"Joseph Heller", year:1961, stars:2, bbc:true, time:true, guardian:false, lemonde:false, blurb:"전쟁의 부조리를 웃음으로 해부한, 가장 진지한 코미디." },
+  { en:"The Sound and the Fury", ko:"소리와 분노", author:"William Faulkner", year:1929, stars:2, bbc:false, time:true, guardian:true, lemonde:false, blurb:"한 가문의 몰락을 네 개의 시선으로. 20세기 미국 문학의 가장 실험적인 걸작." },
   { en:"Ulysses", ko:"율리시스", author:"James Joyce", year:1922, stars:2, bbc:true, time:false, guardian:true, lemonde:false, blurb:"읽기 가장 어렵다고 알려진 소설. 그러나 한 줄 한 줄이 살아있다." }
 ];
 
 let currentFilter = 'all';
-
 function starsStr(n) { return '★'.repeat(n) + '☆'.repeat(4-n); }
+function searchUrl(title) { return BASE + encodeURIComponent(title); }
 
 function renderList() {
   const list = document.getElementById('book-list');
@@ -110,7 +115,8 @@ function showDetail(idx) {
     <div class="detail-stars">${starsStr(b.stars)}</div>
     <div class="detail-blurb">${b.blurb}</div>
     <div class="section-label">매체 선정 현황</div>
-    <div class="media-grid">${media.map((m,i)=>`<div class="media-badge ${b[keys[i]]?'media-on':'media-off'}">${b[keys[i]]?'✓ ':''}${m}</div>`).join('')}</div>`;
+    <div class="media-grid">${media.map((m,i)=>`<div class="media-badge ${b[keys[i]]?'media-on':'media-off'}">${b[keys[i]]?'✓ ':''}${m}</div>`).join('')}</div>
+    <a class="ebook-btn" href="${searchUrl(b.ko)}" target="_blank">📖 전자책으로 읽기</a>`;
 }
 
 function showList() {
