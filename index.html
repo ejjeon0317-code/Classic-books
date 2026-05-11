@@ -74,7 +74,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, query, where, orderBy, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, query, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDo4sxW0D70XcMBBhTn17WWJGq5prEhi2g",
@@ -181,7 +181,7 @@ window.loadComments = async function(idx) {
   const bookId = books[idx].en.replace(/\s/g, '-').toLowerCase();
   const container = document.getElementById(`comment-list-${idx}`);
   try {
-    const q = query(collection(db, 'comments'), where('bookId', '==', bookId), orderBy('createdAt', 'desc'));
+    const q = query(collection(db, 'comments'), where('bookId', '==', bookId));
     const snapshot = await getDocs(q);
     if (snapshot.empty) {
       container.innerHTML = '<div class="comment-empty">아직 한줄평이 없어요. 첫 번째로 남겨보세요!</div>';
