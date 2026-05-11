@@ -12,9 +12,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .logo { height: 36px; margin-bottom: 1rem; }
 .header h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.5px; }
 .header p { font-size: 12px; color: #aaa; margin-top: 5px; letter-spacing: 0.3px; }
-.filter-row { display: flex; gap: 8px; padding: 12px 1.25rem; overflow-x: auto; border-bottom: 1px solid #ebebeb; }
+.filter-row { display: flex; gap: 8px; padding: 12px 1.25rem; overflow-x: auto; border-bottom: none; }
 .filter-btn { font-size: 12px; padding: 5px 14px; border-radius: 20px; border: 1px solid #ddd; background: none; cursor: pointer; color: #888; white-space: nowrap; }
 .filter-btn.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+.star-legend { font-size: 11px; color: #bbb; padding: 0 1.25rem 12px; border-bottom: 1px solid #ebebeb; letter-spacing: 0.2px; }
 .book-list { padding: 1.25rem; display: flex; flex-direction: column; gap: 12px; }
 .book-card { background: #fff; border: 1px solid #ebebeb; border-radius: 14px; padding: 1.1rem 1.25rem; cursor: pointer; transition: box-shadow 0.15s; }
 .book-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.07); border-color: #ddd; }
@@ -50,17 +51,18 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     </div>
     <div class="filter-row">
       <button class="filter-btn active" onclick="filterBooks('all',this)">전체</button>
-      <button class="filter-btn" onclick="filterBooks('4',this)">★★★★</button>
-      <button class="filter-btn" onclick="filterBooks('3',this)">★★★</button>
-      <button class="filter-btn" onclick="filterBooks('2',this)">★★</button>
+      <button class="filter-btn" onclick="filterBooks('4',this)">✒️✒️✒️✒️</button>
+      <button class="filter-btn" onclick="filterBooks('3',this)">✒️✒️✒️</button>
+      <button class="filter-btn" onclick="filterBooks('2',this)">✒️✒️</button>
     </div>
+    <div class="star-legend">✒️는 BBC, TIME, Guardian, Le Monde 선정 매체 수를 나타냅니다.</div>
     <div class="book-list" id="book-list"></div>
   </div>
   <div id="detail-view" class="detail-view"></div>
 </div>
 <script>
 const books = [
-  { en:"The Big Sleep", ko:"빅 슬립", author:"Raymond Chandler", year:1939, stars:4, bbc:true, time:true, guardian:true, lemonde:true, url:"https://si.dkyobobook.co.kr/content/contentView.ink?brcd=4808956050898&cttsDvsnCode=001", blurb:"도시의 뒷골목, 권력의 부패, 도덕적 회색지대 — 4개 매체 모두가 선택한 이 목록의 유일한 ★★★★." },
+  { en:"The Big Sleep", ko:"빅 슬립", author:"Raymond Chandler", year:1939, stars:4, bbc:true, time:true, guardian:true, lemonde:true, url:"https://si.dkyobobook.co.kr/content/contentView.ink?brcd=4808956050898&cttsDvsnCode=001", blurb:"도시의 뒷골목, 권력의 부패, 도덕적 회색지대 — 4개 매체 모두가 선택한 이 목록의 유일한 ✒️✒️✒️✒️." },
   { en:"Brave New World", ko:"멋진 신세계", author:"Aldous Huxley", year:1932, stars:3, bbc:true, time:false, guardian:true, lemonde:true, url:"https://si.dkyobobook.co.kr/content/contentView.ink?brcd=480D240967680&cttsDvsnCode=001", blurb:"억압이 아닌 쾌락으로 통제되는 사회. 오웰이 두려움을 경고했다면, 헉슬리는 편안함을 경고했다." },
   { en:"Nineteen Eighty-Four", ko:"1984", author:"George Orwell", year:1949, stars:3, bbc:true, time:false, guardian:true, lemonde:true, url:"https://si.dkyobobook.co.kr/content/contentView.ink?brcd=480N260422050&cttsDvsnCode=001", blurb:"빅브라더를 두려워하던 시대가 있었다. 지금 우리는 스스로 빅브라더가 되어가고 있지는 않은가." },
   { en:"The Great Gatsby", ko:"위대한 개츠비", author:"F. Scott Fitzgerald", year:1925, stars:3, bbc:false, time:true, guardian:true, lemonde:true, url:"https://si.dkyobobook.co.kr/content/contentView.ink?brcd=480D260479460&cttsDvsnCode=001", blurb:"꿈을 향해 평생 달려가다 결국 혼자 남은 사람. 아메리칸 드림의 가장 아름다운 부고." },
@@ -76,7 +78,7 @@ const books = [
 ];
 
 let currentFilter = 'all';
-function starsStr(n) { return '★'.repeat(n) + '☆'.repeat(4-n); }
+function starsStr(n) { return '✒️'.repeat(n); }
 
 function renderList() {
   const list = document.getElementById('book-list');
