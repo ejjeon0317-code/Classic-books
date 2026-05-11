@@ -22,7 +22,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .book-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
 .book-title { font-size: 15px; font-weight: 600; line-height: 1.4; letter-spacing: -0.2px; }
 .book-title-ko { font-size: 13px; color: #999; margin-top: 3px; }
-.stars { font-size: 11px; color: #c9a227; white-space: nowrap; letter-spacing: 1px; }
+.stars { font-size: 11px; white-space: nowrap; letter-spacing: 1px; }
 .book-meta { display: flex; gap: 6px; margin-top: 9px; flex-wrap: wrap; }
 .badge { font-size: 11px; padding: 3px 9px; border-radius: 20px; background: #f7f7f7; color: #888; border: 1px solid #efefef; }
 .book-blurb { font-size: 13px; color: #777; margin-top: 9px; line-height: 1.65; }
@@ -30,15 +30,26 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .back-btn { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #aaa; background: none; border: none; cursor: pointer; padding: 1.2rem 0; }
 .detail-title { font-size: 22px; font-weight: 600; line-height: 1.4; letter-spacing: -0.5px; }
 .detail-ko { font-size: 15px; color: #999; margin-top: 4px; }
-.detail-stars { font-size: 15px; color: #c9a227; margin-top: 10px; letter-spacing: 1px; }
+.detail-stars { font-size: 15px; margin-top: 10px; letter-spacing: 1px; }
 .detail-blurb { font-size: 15px; color: #666; margin-top: 18px; line-height: 1.75; border-left: 2px solid #ebebeb; padding-left: 14px; }
 .section-label { font-size: 11px; font-weight: 600; color: #bbb; text-transform: uppercase; letter-spacing: 1px; margin: 20px 0 10px; }
 .media-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px; }
 .media-badge { font-size: 12px; padding: 7px 10px; border-radius: 8px; text-align: center; }
 .media-on { background: #f7f7f7; color: #1a1a1a; border: 1px solid #e0e0e0; font-weight: 500; }
 .media-off { color: #ddd; border: 1px solid #f0f0f0; }
-.ebook-btn { display: block; text-align: center; padding: 13px; border-radius: 12px; background: #1a1a1a; color: #fff; text-decoration: none; font-size: 14px; font-weight: 500; }
+.ebook-btn { display: block; text-align: center; padding: 13px; border-radius: 12px; background: #1a1a1a; color: #fff; text-decoration: none; font-size: 14px; font-weight: 500; margin-bottom: 24px; }
 .ebook-btn:hover { background: #333; }
+.comment-section { margin-top: 8px; }
+.comment-input-row { display: flex; gap: 8px; margin-bottom: 16px; }
+.comment-input { flex: 1; font-size: 13px; padding: 9px 12px; border: 1px solid #ddd; border-radius: 10px; outline: none; font-family: inherit; }
+.comment-input:focus { border-color: #1a1a1a; }
+.comment-submit { font-size: 12px; padding: 9px 14px; border-radius: 10px; background: #1a1a1a; color: #fff; border: none; cursor: pointer; white-space: nowrap; }
+.comment-submit:hover { background: #333; }
+.comment-list { display: flex; flex-direction: column; gap: 10px; }
+.comment-item { background: #f9f9f7; border-radius: 10px; padding: 10px 13px; }
+.comment-text { font-size: 13px; color: #444; line-height: 1.6; }
+.comment-time { font-size: 11px; color: #bbb; margin-top: 4px; }
+.comment-empty { font-size: 13px; color: #ccc; text-align: center; padding: 16px 0; }
 </style>
 </head>
 <body>
@@ -60,7 +71,23 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   </div>
   <div id="detail-view" class="detail-view"></div>
 </div>
-<script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, query, where, orderBy, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDo4sxW0D70XcMBBhTn17WWJGq5prEhi2g",
+  authDomain: "classic-books-3c937.firebaseapp.com",
+  projectId: "classic-books-3c937",
+  storageBucket: "classic-books-3c937.firebasestorage.app",
+  messagingSenderId: "472971686422",
+  appId: "1:472971686422:web:7ff3f824b149079691fb37"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 const books = [
   { en:"The Big Sleep", ko:"빅 슬립", author:"Raymond Chandler", year:1939, stars:4, bbc:true, time:true, guardian:true, lemonde:true, url:"https://si.dkyobobook.co.kr/content/contentView.ink?brcd=4808956050898&cttsDvsnCode=001", blurb:"도시의 뒷골목, 권력의 부패, 도덕적 회색지대 — 4개 매체 모두가 선택한 이 목록의 유일한 ✒️✒️✒️✒️." },
   { en:"Brave New World", ko:"멋진 신세계", author:"Aldous Huxley", year:1932, stars:3, bbc:true, time:false, guardian:true, lemonde:true, url:"https://si.dkyobobook.co.kr/content/contentView.ink?brcd=480D240967680&cttsDvsnCode=001", blurb:"억압이 아닌 쾌락으로 통제되는 사회. 오웰이 두려움을 경고했다면, 헉슬리는 편안함을 경고했다." },
@@ -80,7 +107,20 @@ const books = [
 let currentFilter = 'all';
 function starsStr(n) { return '✒️'.repeat(n); }
 
-function renderList() {
+function timeAgo(ts) {
+  if (!ts) return '';
+  const now = Date.now();
+  const diff = now - ts.toMillis();
+  const min = Math.floor(diff / 60000);
+  if (min < 1) return '방금 전';
+  if (min < 60) return `${min}분 전`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}시간 전`;
+  const day = Math.floor(hr / 24);
+  return `${day}일 전`;
+}
+
+window.renderList = function() {
   const list = document.getElementById('book-list');
   const filtered = currentFilter==='all' ? books : books.filter(b=>b.stars===parseInt(currentFilter));
   list.innerHTML = filtered.map((b)=>`
@@ -94,21 +134,22 @@ function renderList() {
     </div>`).join('');
 }
 
-function filterBooks(val,btn) {
-  currentFilter=val;
+window.filterBooks = function(val, btn) {
+  currentFilter = val;
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   renderList();
 }
 
-function showDetail(idx) {
-  const b=books[idx];
-  document.getElementById('list-view').style.display='none';
-  const dv=document.getElementById('detail-view');
-  dv.style.display='block';
-  const media=['BBC','TIME','Guardian','Le Monde'];
-  const keys=['bbc','time','guardian','lemonde'];
-  dv.innerHTML=`
+window.showDetail = async function(idx) {
+  const b = books[idx];
+  document.getElementById('list-view').style.display = 'none';
+  const dv = document.getElementById('detail-view');
+  dv.style.display = 'block';
+  const media = ['BBC','TIME','Guardian','Le Monde'];
+  const keys = ['bbc','time','guardian','lemonde'];
+
+  dv.innerHTML = `
     <button class="back-btn" onclick="showList()">← 목록으로</button>
     <div class="detail-title">${b.en}</div>
     <div class="detail-ko">${b.ko} · ${b.author} · ${b.year}</div>
@@ -116,12 +157,64 @@ function showDetail(idx) {
     <div class="detail-blurb">${b.blurb}</div>
     <div class="section-label">매체 선정 현황</div>
     <div class="media-grid">${media.map((m,i)=>`<div class="media-badge ${b[keys[i]]?'media-on':'media-off'}">${b[keys[i]]?'✓ ':''}${m}</div>`).join('')}</div>
-    <a class="ebook-btn" href="${b.url}" target="_blank">전자책으로 읽기</a>`;
+    <a class="ebook-btn" href="${b.url}" target="_blank">전자책으로 읽기</a>
+    <div class="section-label">한줄평</div>
+    <div class="comment-section">
+      <div class="comment-input-row">
+        <input class="comment-input" id="comment-input-${idx}" placeholder="이 책에 대한 한줄평을 남겨보세요" maxlength="100">
+        <button class="comment-submit" onclick="submitComment(${idx})">등록</button>
+      </div>
+      <div class="comment-list" id="comment-list-${idx}">
+        <div class="comment-empty">불러오는 중...</div>
+      </div>
+    </div>`;
+
+  loadComments(idx);
 }
 
-function showList() {
-  document.getElementById('detail-view').style.display='none';
-  document.getElementById('list-view').style.display='block';
+window.showList = function() {
+  document.getElementById('detail-view').style.display = 'none';
+  document.getElementById('list-view').style.display = 'block';
+}
+
+window.loadComments = async function(idx) {
+  const bookId = books[idx].en.replace(/\s/g, '-').toLowerCase();
+  const container = document.getElementById(`comment-list-${idx}`);
+  try {
+    const q = query(collection(db, 'comments'), where('bookId', '==', bookId), orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
+    if (snapshot.empty) {
+      container.innerHTML = '<div class="comment-empty">아직 한줄평이 없어요. 첫 번째로 남겨보세요!</div>';
+      return;
+    }
+    container.innerHTML = snapshot.docs.map(doc => {
+      const d = doc.data();
+      return `<div class="comment-item">
+        <div class="comment-text">${d.text}</div>
+        <div class="comment-time">${timeAgo(d.createdAt)}</div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    container.innerHTML = '<div class="comment-empty">불러오기 실패</div>';
+  }
+}
+
+window.submitComment = async function(idx) {
+  const input = document.getElementById(`comment-input-${idx}`);
+  const text = input.value.trim();
+  if (!text) return;
+  const bookId = books[idx].en.replace(/\s/g, '-').toLowerCase();
+  try {
+    await addDoc(collection(db, 'comments'), {
+      bookId,
+      text,
+      createdAt: serverTimestamp()
+    });
+    input.value = '';
+    loadComments(idx);
+  } catch(e) {
+    alert('등록 실패. 잠시 후 다시 시도해주세요.');
+  }
 }
 
 renderList();
