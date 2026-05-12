@@ -21,7 +21,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .book-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.07); border-color: #ddd; }
 .book-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
 .book-title { font-size: 15px; font-weight: 600; line-height: 1.4; letter-spacing: -0.2px; }
-.book-title-ko { font-size: 13px; color: #999; margin-top: 3px; }
+.book-title-en { font-size: 12px; color: #aaa; margin-top: 3px; font-weight: 400; letter-spacing: 0.1px; }
 .stars { font-size: 11px; white-space: nowrap; letter-spacing: 1px; }
 .book-meta { display: flex; gap: 6px; margin-top: 9px; flex-wrap: wrap; }
 .badge { font-size: 11px; padding: 3px 9px; border-radius: 20px; background: #f7f7f7; color: #888; border: 1px solid #efefef; }
@@ -29,7 +29,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .detail-view { padding: 0 1.25rem 2rem; display: none; }
 .back-btn { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #aaa; background: none; border: none; cursor: pointer; padding: 1.2rem 0; }
 .detail-title { font-size: 22px; font-weight: 600; line-height: 1.4; letter-spacing: -0.5px; }
-.detail-ko { font-size: 15px; color: #999; margin-top: 4px; }
+.detail-en { font-size: 14px; color: #aaa; margin-top: 4px; font-weight: 400; }
 .detail-stars { font-size: 15px; margin-top: 10px; letter-spacing: 1px; }
 .detail-blurb { font-size: 15px; color: #666; margin-top: 18px; line-height: 1.75; border-left: 2px solid #ebebeb; padding-left: 14px; }
 .section-label { font-size: 11px; font-weight: 600; color: #bbb; text-transform: uppercase; letter-spacing: 1px; margin: 20px 0 10px; }
@@ -126,7 +126,7 @@ window.renderList = function() {
   list.innerHTML = filtered.map((b)=>`
     <div class="book-card" onclick="showDetail(${books.indexOf(b)})">
       <div class="book-header">
-        <div><div class="book-title">${b.en}</div><div class="book-title-ko">${b.ko}</div></div>
+        <div><div class="book-title">${b.ko}</div><div class="book-title-en">${b.en}</div></div>
         <div class="stars">${starsStr(b.stars)}</div>
       </div>
       <div class="book-meta"><span class="badge">${b.author}</span><span class="badge">${b.year}</span></div>
@@ -151,8 +151,8 @@ window.showDetail = async function(idx) {
 
   dv.innerHTML = `
     <button class="back-btn" onclick="showList()">← 목록으로</button>
-    <div class="detail-title">${b.en}</div>
-    <div class="detail-ko">${b.ko} · ${b.author} · ${b.year}</div>
+    <div class="detail-title">${b.ko}</div>
+    <div class="detail-en">${b.en} · ${b.author} · ${b.year}</div>
     <div class="detail-stars">${starsStr(b.stars)}</div>
     <div class="detail-blurb">${b.blurb}</div>
     <div class="section-label">매체 선정 현황</div>
